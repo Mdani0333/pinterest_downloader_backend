@@ -1,0 +1,24 @@
+{
+  "name": "pinterest-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.8.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "ffmpeg-static": "^5.2.0",
+    "m3u8-parser": "^7.2.0",
+    "nodemon": "^3.1.9",
+    "puppeteer": "^24.4.0",
+    "uuid": "^11.1.0"
+  }
+}
