@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: your-service-name
+    env: node
+    buildCommand: ./build.sh
+    startCommand: npm run start
