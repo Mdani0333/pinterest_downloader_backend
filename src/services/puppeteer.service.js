@@ -14,7 +14,7 @@ class PuppeteerService {
       this.browserInstance = await puppeteer.launch({
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        executablePath: process.env.ENV === "prod" ? "/usr/bin/google-chrome-stable" : puppeteer.executablePath()
+        executablePath: puppeteer.executablePath()
       });
     }
     return this.browserInstance;
