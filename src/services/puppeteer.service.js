@@ -1,3 +1,4 @@
+import fs from "fs"
 import puppeteer from "puppeteer";
 
 class PuppeteerService {
@@ -9,16 +10,29 @@ class PuppeteerService {
     return PuppeteerService.instance;
   }
 
-  async launch() {
-    if (!this.browserInstance) {
-      this.browserInstance = await puppeteer.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        executablePath: process.env.ENV === "prod" ? "/opt/render/.cache/puppeteer/chrome/linux-134.0.6998.35/chrome-linux64/chrome" : puppeteer.executablePath()
-      });
+async launch() {
+  if (!this.browserInstance) {
+    const executablePath = "/opt/render/.cache/puppeteer/chrome/linux-134.0.6998.35/chrome-linux64/chrome";
+    console.log("Chrome executable path:", executablePath);
+
+    // Check if the file exists
+    if (!fs.existsSync(executablePath)) {
+      console.error("Chrome executable not found at:", executablePath);
+      throw new Error("Chrome executable not found");
     }
-    return this.browserInstance;
+
+    // Check file permissions
+    const stats = fs.statSync(executablePath);
+    console.log("File permissions:", stats.mode.toString(8)); // Octal representation of permissions
+
+    this.browserInstance = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: executablePath
+    });
   }
+  return this.browserInstance;
+}
 
   async getNewPage() {
     const newPage = await this.browserInstance.newPage();
