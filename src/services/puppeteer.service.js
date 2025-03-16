@@ -12,20 +12,18 @@ class PuppeteerService {
 
   async launch() {
     if (!this.browserInstance) {
-      const executablePath = "/usr/bin/google-chrome-stable";
+      const executablePath = "./.cache/puppeteer/chrome/linux-134.0.6998.35/chrome-linux64/chrome";
       console.log("Chrome executable path:", executablePath);
-
-      // Check if the file exists
-      const fs = require("fs");
+  
       if (!fs.existsSync(executablePath)) {
         console.error("Chrome executable not found at:", executablePath);
         throw new Error("Chrome executable not found");
       }
-
+  
       this.browserInstance = await puppeteer.launch({
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        executablePath: executablePath,
+        executablePath: executablePath
       });
     }
     return this.browserInstance;
