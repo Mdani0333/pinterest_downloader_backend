@@ -4,9 +4,9 @@ import axios from "axios";
 import { exec } from "child_process";
 import { Parser } from "m3u8-parser";
 import ffmpegPath from "ffmpeg-static";
-import { puppeteerService } from "../services/puppeteer.service.js";
-import { tokenUtility } from "../utils/token.utility.js";
-import { NotFoundException } from "../exceptions/notFound.exception.js";
+import { puppeteerService } from "../../services/puppeteer.service.js";
+import { tokenUtility } from "../../utils/token.utility.js";
+import { NotFoundException } from "../../exceptions/notFound.exception.js";
 
 export class PinterestUtility {
   constructor() {
@@ -15,7 +15,8 @@ export class PinterestUtility {
   }
 
   isValidPinterestUrl = (url) => {
-    const pinterestUrlPattern = /^https?:\/\/(www\.|in\.)?pinterest\.com\/pin\/\d+/;
+    const pinterestUrlPattern =
+      /^https?:\/\/(www\.|in\.)?pinterest\.com\/pin\/\d+/;
     return pinterestUrlPattern.test(url);
   };
 
@@ -97,6 +98,12 @@ export class PinterestUtility {
   };
 
   downloadHlsVideo = async ({ videoUrl, audioUrl, tempDir }) => {
+    const uniqueID = await this.tokenUtility.generateHashedUUIDToken();
+
+    tempDir = path.join(tempDir, uniqueID);
+
+    fs.mkdirSync(tempDir);
+
     const videoSegmentFiles = await this.downloadSegments(
       videoUrl,
       "video",
@@ -115,12 +122,7 @@ export class PinterestUtility {
       );
     }
 
-    const video_filename = await this.tokenUtility.generateHashedUUIDToken();
-
-    const videoOutputFilePath = path.join(
-      tempDir,
-      `${video_filename}_video.mp4`
-    );
+    const videoOutputFilePath = path.join(tempDir, "video.mp4");
 
     const videoWriteStream = fs.createWriteStream(videoOutputFilePath);
 
@@ -147,9 +149,7 @@ export class PinterestUtility {
     let audioOutputFilePath = null;
 
     if (audioSegmentFiles.length > 0) {
-      const audio_filename = await this.tokenUtility.generateHashedUUIDToken();
-
-      audioOutputFilePath = path.join(tempDir, `${audio_filename}_audio.aac`);
+      audioOutputFilePath = path.join(tempDir, "audio.aac");
 
       const audioWriteStream = fs.createWriteStream(audioOutputFilePath);
 
@@ -174,12 +174,7 @@ export class PinterestUtility {
       });
     }
 
-    const full_video_filename = await this.tokenUtility.generateHashedUUIDToken();
-
-    const finalOutputFilePath = path.join(
-      tempDir,
-      `${full_video_filename}_video_output.mp4`
-    );
+    const finalOutputFilePath = path.join(tempDir, "output.mp4");
 
     if (audioOutputFilePath) {
       await this.mergeVideoAudio(
@@ -205,6 +200,9 @@ export class PinterestUtility {
       fs.unlinkSync(audioOutputFilePath);
     }
 
-    return finalOutputFilePath;
+    return {
+      outputPath: finalOutputFilePath,
+      folderUsed: tempDir,
+    };
   };
 }

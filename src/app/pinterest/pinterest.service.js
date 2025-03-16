@@ -1,8 +1,8 @@
-import { NotFoundException } from "../exceptions/notFound.exception.js";
-import { puppeteerService } from "../services/puppeteer.service.js";
+import { NotFoundException } from "../../exceptions/notFound.exception.js";
+import { puppeteerService } from "../../services/puppeteer.service.js";
 import { PinterestUtility } from "./pinterest.utility.js";
-import { BadRequestException } from "../exceptions/badRequest.exception.js";
-import { configs } from "../configs/configs.js";
+import { BadRequestException } from "../../exceptions/badRequest.exception.js";
+import { configs } from "../../configs/configs.js";
 
 export class PinterestService {
   constructor() {
@@ -48,15 +48,14 @@ export class PinterestService {
   };
 
   downloadVideo = async (url) => {
-    const { videoUrl, audioUrl } =
-      await this.pinterestUtility.getVideoAudioUrls(url);
+    const { videoUrl, audioUrl } = await this.pinterestUtility.getVideoAudioUrls(url);
 
-    const outputPath = await this.pinterestUtility.downloadHlsVideo({
+    const result = await this.pinterestUtility.downloadHlsVideo({
       videoUrl,
       audioUrl,
       tempDir: configs.TEMP_DIR,
     });
 
-    return outputPath;
+    return result;
   };
 }
