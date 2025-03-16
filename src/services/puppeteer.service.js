@@ -14,7 +14,7 @@ class PuppeteerService {
       this.browserInstance = await puppeteer.launch({
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        executablePath: puppeteer.executablePath()
+        executablePath: process.env.ENV === "prod" ? "/opt/render/.cache/puppeteer/chrome/linux-134.0.6998.35/chrome-linux64/chrome" : puppeteer.executablePath()
       });
     }
     return this.browserInstance;
