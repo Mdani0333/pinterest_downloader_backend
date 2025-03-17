@@ -17,8 +17,7 @@ export class PinterestUtility {
   }
 
   isValidPinterestUrl = (url) => {
-    const pinterestUrlPattern =
-      /^https?:\/\/(www\.|in\.)?pinterest\.com\/pin\/\d+/;
+    const pinterestUrlPattern = /^https?:\/\/(www\.|in\.)?pinterest\.com\/pin\/\d+/;
     return pinterestUrlPattern.test(url);
   };
 
@@ -89,6 +88,20 @@ export class PinterestUtility {
     return segmentFiles;
   };
 
+  writeSegmentsToFile = async (segmentFiles, writeStream) => {
+    for (const segmentFile of segmentFiles) {
+      const segmentData = fs.readFileSync(segmentFile);
+      writeStream.write(segmentData);
+      fs.unlinkSync(segmentFile); // Delete the segment file after writing
+    }
+    writeStream.end();
+
+    await new Promise((resolve, reject) => {
+      writeStream.on("finish", resolve);
+      writeStream.on("error", reject);
+    });
+  };
+
   mergeVideoAudio = (videoPath, audioPath, outputPath) => {
     return new Promise((resolve, reject) => {
       const command = `${ffmpegPath} -i ${videoPath} -i ${audioPath} -c:v copy -c:a aac -y ${outputPath}`;
@@ -154,20 +167,6 @@ export class PinterestUtility {
       outputPath: finalOutputFilePath,
       folderUsed: tempDir,
     };
-  };
-
-  writeSegmentsToFile = async (segmentFiles, writeStream) => {
-    for (const segmentFile of segmentFiles) {
-      const segmentData = fs.readFileSync(segmentFile);
-      writeStream.write(segmentData);
-      fs.unlinkSync(segmentFile); // Delete the segment file after writing
-    }
-    writeStream.end();
-
-    await new Promise((resolve, reject) => {
-      writeStream.on("finish", resolve);
-      writeStream.on("error", reject);
-    });
   };
 
   cleanupTempFiles = async (tempDir) => {
