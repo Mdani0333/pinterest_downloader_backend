@@ -18,7 +18,7 @@ class PuppeteerService {
       this.browserInstance = await puppeteer.launch({
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        ...(process.env.ENV === "prod" ?? { executablePath: executablePath }),
+        executablePath: process.env.ENV === "prod" ? executablePath : "",
       });
     }
     return this.browserInstance;
