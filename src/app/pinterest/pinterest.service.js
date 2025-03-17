@@ -3,16 +3,30 @@ import { puppeteerService } from "../../services/puppeteer.service.js";
 import { PinterestUtility } from "./pinterest.utility.js";
 import { BadRequestException } from "../../exceptions/badRequest.exception.js";
 import { configs } from "../../configs/configs.js";
+import { cacheService } from "../../services/caching.service.js";
+import { streamFileWithProgress } from "../../utils/stream.utility.js";
 
 export class PinterestService {
   constructor() {
     this.pinterestUtility = new PinterestUtility();
     this.puppeteerService = puppeteerService;
+    this.cacheService = cacheService
   }
 
-  getPreview = async (url) => {
+  getPreview = async (req, res) => {
+    const { url } = req.query;
+
     if (!this.pinterestUtility.isValidPinterestUrl(url)) {
       throw new BadRequestException("Invalid Pinterest URL!");
+    }
+
+    const cachedResult = this.cacheService.get(`preview:${url}`);
+    if (cachedResult) {
+      return res.status(200).json({
+        success: true,
+        message: "Preview Image fetched successfully!",
+        data: cachedResult,
+      });
     }
 
     const page = await this.puppeteerService.getNewPage();
@@ -38,16 +52,24 @@ export class PinterestService {
       return null;
     });
 
-    await page.close();
+    await this.puppeteerService.releasePage(page);
 
     if (!mediaProps) {
       throw new NotFoundException("Preview Image Not Found!");
     }
 
-    return mediaProps;
+    this.cacheService.set(`preview:${url}`, mediaProps);
+
+    return res.status(200).json({
+      success: true,
+      message: "Preview Image fetched successfully!",
+      data: mediaProps,
+    });
   };
 
-  downloadVideo = async (url) => {
+  downloadVideo = async (req, res) => {
+    const { url } = req.body;
+
     const { videoUrl, audioUrl } = await this.pinterestUtility.getVideoAudioUrls(url);
 
     const result = await this.pinterestUtility.downloadHlsVideo({
@@ -56,6 +78,16 @@ export class PinterestService {
       tempDir: configs.TEMP_DIR,
     });
 
-    return result;
+    // await streamFileWithProgress(result.outputPath, res, (progress) => {
+    //   console.log(`Download progress: ${progress}%`);
+    // });
+
+    return res.sendFile(result.outputPath, (err) => {
+      if (err) {
+        next(err);
+      } else {
+        this.pinterestUtility.cleanupTempFiles(result.folderUsed)
+      }
+    });
   };
 }
