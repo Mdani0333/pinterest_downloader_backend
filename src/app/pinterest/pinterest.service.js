@@ -58,6 +58,8 @@ export class PinterestService {
       throw new NotFoundException("Preview Image Not Found!");
     }
 
+    mediaProps.size = await this.pinterestUtility.fetchMediaSize(mediaProps.previewImageUrl);
+
     this.cacheService.set(`preview:${url}`, mediaProps);
 
     return res.status(200).json({
@@ -78,16 +80,8 @@ export class PinterestService {
       tempDir: configs.TEMP_DIR,
     });
 
-    // await streamFileWithProgress(result.outputPath, res, (progress) => {
-    //   console.log(`Download progress: ${progress}%`);
-    // });
+    await streamFileWithProgress(result.outputPath, res);
 
-    return res.sendFile(result.outputPath, (err) => {
-      if (err) {
-        next(err);
-      } else {
-        this.pinterestUtility.cleanupTempFiles(result.folderUsed)
-      }
-    });
+    this.pinterestUtility.cleanupTempFiles(result.folderUsed)
   };
 }

@@ -88,6 +88,17 @@ export class PinterestUtility {
     return segmentFiles;
   };
 
+  fetchMediaSize = async (mediaUrl) => {
+    try {
+      const response = await axios.head(mediaUrl); 
+      const fileSize = response.headers['content-length']; 
+      return fileSize;
+    } catch (error) {
+      console.error("Failed to fetch file size:", error);
+      return null;
+    }
+  };
+
   writeSegmentsToFile = async (segmentFiles, writeStream) => {
     for (const segmentFile of segmentFiles) {
       const segmentData = fs.readFileSync(segmentFile);
