@@ -17,7 +17,7 @@ class PuppeteerService {
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
         executablePath:
-          process.env.ENV === "prod" ? "/usr/bin/google-chrome-stable" : "",
+          process.env.ENV === "prod" ? "/home/ubuntu/chrome/opt/google/chrome/chrome" : "",
       });
     }
     return this.browserInstance;
