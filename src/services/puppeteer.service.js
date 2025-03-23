@@ -13,12 +13,11 @@ class PuppeteerService {
 
   async launch() {
     if (!this.browserInstance) {
-      const executablePath = "./.cache/puppeteer/chrome/linux-134.0.6998.35/chrome-linux64/chrome";
-
       this.browserInstance = await puppeteer.launch({
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        executablePath: process.env.ENV === "prod" ? executablePath : "",
+        executablePath:
+          process.env.ENV === "prod" ? "/usr/bin/google-chrome-stable" : "",
       });
     }
     return this.browserInstance;
@@ -29,7 +28,9 @@ class PuppeteerService {
       return this.pagePool.pop();
     }
     const newPage = await this.browserInstance.newPage();
-    await newPage.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+    await newPage.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    );
     return newPage;
   }
 
