@@ -4,7 +4,6 @@ import { PinterestUtility } from "./pinterest.utility.js";
 import { BadRequestException } from "../../exceptions/badRequest.exception.js";
 import { configs } from "../../configs/configs.js";
 import { cacheService } from "../../services/caching.service.js";
-import { streamFileWithProgress } from "../../utils/stream.utility.js";
 
 export class PinterestService {
   constructor() {
@@ -80,8 +79,12 @@ export class PinterestService {
       tempDir: configs.TEMP_DIR,
     });
 
-    await streamFileWithProgress(result.outputPath, res);
-
-    this.pinterestUtility.cleanupTempFiles(result.folderUsed)
+    return res.sendFile(result.outputPath, (err) => {
+      if (err) {
+        next(err);
+      } else {
+        this.pinterestUtility.cleanupTempFiles(result.folderUsed)
+      }
+    });
   };
 }
