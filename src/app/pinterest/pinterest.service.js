@@ -81,7 +81,7 @@ export class PinterestService {
 
     return res.sendFile(result.outputPath, (err) => {
       if (err) {
-        next(err);
+        throw new Error(err);
       } else {
         this.pinterestUtility.cleanupTempFiles(result.folderUsed)
       }
